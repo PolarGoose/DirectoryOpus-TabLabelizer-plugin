@@ -1,0 +1,4 @@
+<job id="IncludeExample">
+  <script language="JScript" src="tab-labelizer.js"/>
+  <script language="JScript" src="tests-impl.js"/>
+</job>
