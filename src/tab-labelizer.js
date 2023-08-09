@@ -24,6 +24,12 @@ function setTabName(tab) {
 }
 
 function getTabLabel(displayPath) {
+    for (var e = new Enumerator(DOpus.aliases); !e.atEnd(); e.moveNext()) {
+        var a = e.item();
+    
+        if(String(a.path) == displayPath)
+            return String(a);
+    }
     if (displayPath.substring(0, 6) === "ftp://") {
         return getFtpLabel(displayPath);
     }
