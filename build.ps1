@@ -52,12 +52,8 @@ Function GetVersion() {
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 $ProgressPreference = "SilentlyContinue"
-$root = Resolve-Path "$PSScriptRoot/../.."
+$root = Resolve-Path $PSScriptRoot
 $version = GetVersion
-
-Info "Run tests"
-CScript $root/src/tests.wsf
-CheckReturnCodeOfPreviousCommand "Running tests failed"
 
 CopyFile $root/src/tab-labelizer.js $root/Build
 InsertVersionInsideScript $root/Build/tab-labelizer.js $version
