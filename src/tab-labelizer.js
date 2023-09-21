@@ -1,3 +1,5 @@
+var folderAliasesToIgnore =  ["homeroot", "default", "last"]
+
 function OnInit(data) {
     data.name = "Tab labelizer";
     data.desc = "Gives more detailed names to tabs";
@@ -55,6 +57,11 @@ function getAlias(path) {
     matchingAliases = []
     for (var e = new Enumerator(DOpus.Aliases); !e.atEnd(); e.moveNext()) {
         var alias = e.item();
+
+        if(contains(folderAliasesToIgnore, alias)) {
+            continue;
+        }
+
         if(startsWith(path, alias.Path)) {
             matchingAliases.push(alias);
         }
@@ -88,6 +95,16 @@ function splitWithoutEmptyElements(str, separator) {
 
 function truncateIfTooLong(label) {
     return label.length <= 40 ? label : label.substring(0, 40) + "~"
+}
+
+function contains(array, obj) {
+    var i = array.length;
+    while (i--) {
+       if (array[i] == obj) {
+           return true;
+       }
+    }
+    return false;
 }
 
 function startsWith(str, prefix) {
