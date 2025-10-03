@@ -27,9 +27,9 @@ function setTabName(/* Tab */ tab) {
   runDopusCommand('GO TABNAME="' + getTabLabel(tabDisplayName) + '"', tab)
 }
 
-function getTabLabel(path) {
+function /* string */ getTabLabel(/* string */ path) {
   // ftp paths are not supported by this script, don't alter the existing DOpus behavior
-  if (startsWith(path, "ftp://")) {
+  if (startsWithCaseInsensitive(path, "ftp://")) {
     return ""
   }
   return getLabel(tryApplyAlias(path))
@@ -38,7 +38,7 @@ function getTabLabel(path) {
 // If there is an alias defined in "Folder Aliases", returns the path starting from the alias name.
 // Example:
 //   "C:\Users\Public\Folder1\Folder2\Folder3" => "commonfiles\Folder1\Folder2\Folder3"
-function tryApplyAlias(path) {
+function /* string */ tryApplyAlias(/* string */ path) {
   var alias = getBestMatchingAlias(path)
 
   // if no alias is defined, return the original path
@@ -57,7 +57,7 @@ function tryApplyAlias(path) {
 // There can be different aliases that are suitable for a given path. We choose the one with the longest path, because it is the most specific.
 // For example the path "C:\Users\userName\AppData\Roaming\GPSoftware", can be converted to "profile\AppData\Roaming\GPSoftware" or "appdata\GPSoftware".
 // We need to take the second one.
-function /* Alias */ getBestMatchingAlias(path) {
+function /* Alias */ getBestMatchingAlias(/* string */ path) {
   DOpus.Aliases.Update()
 
   var matchingAliases = []
@@ -65,11 +65,11 @@ function /* Alias */ getBestMatchingAlias(path) {
     var alias = e.item()
 
     // Skip ignored aliases
-    if(contains(folderAliasesToIgnore, alias)) {
+    if (contains(folderAliasesToIgnore, alias)) {
       continue;
     }
 
-    if (startsWith(path, alias.Path)) {
+    if (startsWithCaseInsensitive(path, alias.Path)) {
       matchingAliases.push(alias)
     }
   }
@@ -79,20 +79,20 @@ function /* Alias */ getBestMatchingAlias(path) {
   }
 
   // Return the alias with the longest Path
-  return matchingAliases.sort(function(a, b) { return b.Path.length - a.Path.length })[0]
+  return matchingAliases.sort(function (a, b) { return new String(b.Path).length - new String(a.Path).length})[0]
 }
 
 // Converts path into a shorter form. Examples:
 //   C:\host\share\subdir1\subdir2\subdir3 => C:\host\~\subdir2\subdir3
 //   \\host\share\subdir1\subdir2\subdir3 => \\host\share\~\subdir2\subdir3
-function getLabel(path) {
+function /* string */ getLabel(/* string */ path) {
   var pathParts = splitWithoutEmptyElements(path, "\\")
 
   if (pathParts.length <= 4) {
     return truncateIfTooLong(path)
   }
 
-  var uncPrefix = startsWith(path, "\\\\") ? "\\\\" : ""
+  var uncPrefix = startsWithCaseInsensitive(path, "\\\\") ? "\\\\" : ""
   var shortenedPath = uncPrefix + pathParts[0] + "\\" + pathParts[1] + "\\~\\" + pathParts[pathParts.length - 2] + "\\" + pathParts[pathParts.length - 1]
   return truncateIfTooLong(shortenedPath)
 }
@@ -118,8 +118,8 @@ function contains(array, obj) {
   return false;
 }
 
-function startsWith(str, prefix) {
-  return str.indexOf(prefix) === 0
+function startsWithCaseInsensitive(str, prefix) {
+  return String(str).toLowerCase().indexOf(String(prefix).toLowerCase()) === 0
 }
 
 function lastSymbol(str) {
@@ -127,13 +127,13 @@ function lastSymbol(str) {
 }
 
 function removeEmptyElements(stringArray) {
-    var res = []
-    for (i = 0; i < stringArray.length; i++) {
-        if (stringArray[i].length) {
-            res.push(stringArray[i])
-        }
+  var res = []
+  for (var i = 0; i < stringArray.length; i++) {
+    if (stringArray[i].length) {
+      res.push(stringArray[i])
     }
-    return res
+  }
+  return res
 }
 
 function runDopusCommand(command, tab) {
