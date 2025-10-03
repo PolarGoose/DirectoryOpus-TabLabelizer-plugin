@@ -11,6 +11,11 @@ A plugin for [Directory Opus](https://www.gpsoft.com.au/) to assign more detaile
   * You can specify the maximum tab length in the script configuration menu
   * You can customize folder aliases ignore list by modifying `folderAliasesToIgnore` variable at the beginning of the script
 
+If you update TabLabelizer to a new version, you may need to disable the script in Directory Opus, and then enable it. 
+This is especially needed when TabLabelizer changes its configuration keys.
+If you don't do it, the new configuration keys refer to the value null.
+
+
 # References
 * [Discussion of this plugin on DOpus forum](https://resource.dopus.com/t/tab-labelizer-plugin-to-assign-more-detailed-names-to-tabs/37275)
 * [Directory Opus 12 Scripting Reference](https://www.gpsoft.com.au/help/opus12/index.html#!Documents/scriptingreference.htm)
