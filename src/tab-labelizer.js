@@ -1,19 +1,18 @@
 var folderAliasesToIgnore = ["homeroot", "default", "last"]
 
-function OnInit(data) {
+function /* void */ OnInit(/* ScriptInitData */ data) {
   data.name = "Tab labelizer"
   data.desc = "Gives more detailed names to tabs"
-  data.version = "0.0-dev"
+  data.version = "6.0"
   data.url = "https://github.com/PolarGoose/DirectoryOpus-TabLabelizer-plugin"
   data.default_enable = true
-  data.config_desc = DOpus.NewMap()
   data.config.maxTabLabelLength = 40
-  data.config_desc("maxTabLabelLength") = "Specifies the maximum length of the tab label"
+  data.config.maxTabLabelLength.desc = "Specifies the maximum length of the tab label"
   data.config.debug = false
-  data.config_desc("debug") = "Print debug messages to the script log"
+  data.config.debug.desc = "Print debug messages to the script log"
 }
 
-function OnAfterFolderChange(/* AfterFolderChangeData */ data) {
+function /* void */ OnAfterFolderChange(/* AfterFolderChangeData */ data) {
   debug("OnAfterFolderChange")
   if (!data.result) {
     return
@@ -21,7 +20,7 @@ function OnAfterFolderChange(/* AfterFolderChangeData */ data) {
   setTabName(data.tab)
 }
 
-function setTabName(/* Tab */ tab) {
+function /* void */ setTabName(/* Tab */ tab) {
   var tabDisplayName = DOpus.fsutil().DisplayName(tab.path, "r")
   debug("updateLister. originalPath='" + tab.path + "'; tabDisplayName='" + tabDisplayName + "'")
   runDopusCommand('GO TABNAME="' + getTabLabel(tabDisplayName) + '"', tab)
@@ -29,7 +28,7 @@ function setTabName(/* Tab */ tab) {
 
 function /* string */ getTabLabel(/* string */ path) {
   // ftp paths are not supported by this script, don't alter the existing DOpus behavior
-  if (startsWithCaseInsensitive(path, "ftp://")) {
+  if (startsWith_caseInsensitive(path, "ftp://")) {
     return ""
   }
   return getLabel(tryApplyAlias(path))
@@ -66,10 +65,10 @@ function /* Alias */ getBestMatchingAlias(/* string */ path) {
 
     // Skip ignored aliases
     if (contains(folderAliasesToIgnore, alias)) {
-      continue;
+      continue
     }
 
-    if (startsWithCaseInsensitive(path, alias.Path)) {
+    if (startsWith_caseInsensitive(path, alias.Path)) {
       matchingAliases.push(alias)
     }
   }
@@ -92,41 +91,44 @@ function /* string */ getLabel(/* string */ path) {
     return truncateIfTooLong(path)
   }
 
-  var uncPrefix = startsWithCaseInsensitive(path, "\\\\") ? "\\\\" : ""
+  var uncPrefix = startsWith_caseInsensitive(path, "\\\\") ? "\\\\" : ""
   var shortenedPath = uncPrefix + pathParts[0] + "\\" + pathParts[1] + "\\~\\" + pathParts[pathParts.length - 2] + "\\" + pathParts[pathParts.length - 1]
   return truncateIfTooLong(shortenedPath)
 }
 
-function splitWithoutEmptyElements(str, separator) {
+function /* string[] */ splitWithoutEmptyElements(/* string */ str, /* string */ separator) {
   return removeEmptyElements(str.split(separator))
 }
 
-function truncateIfTooLong(label) {
+// Truncates the label in the middle
+function /* string */ truncateIfTooLong(/* string */ label) {
   if (label.length <= Script.config.maxTabLabelLength) {
     return label
   }
-  return label.substring(0, Script.config.maxTabLabelLength) + "~"
+
+  var firstPartLen = Math.floor(Script.config.maxTabLabelLength / 3)
+  var lastPartLen = Script.config.maxTabLabelLength - firstPartLen - 1 // -1 for the "~" we insert
+  return label.substring(0, firstPartLen) + "~" + label.substring(label.length - lastPartLen)
 }
 
-function contains(array, obj) {
-  var i = array.length;
-  while (i--) {
+function /* bool */ contains(/* any[] */ array, /* any */ obj) {
+  for (var i = 0; i < array.length; i++) {
     if (array[i] == obj) {
-      return true;
+      return true
     }
   }
-  return false;
+  return false
 }
 
-function startsWithCaseInsensitive(str, prefix) {
+function /* bool */ startsWith_caseInsensitive(/* string */ str, /* string */ prefix) {
   return String(str).toLowerCase().indexOf(String(prefix).toLowerCase()) === 0
 }
 
-function lastSymbol(str) {
+function /* char */ lastSymbol(/* string */ str) {
   return str.charAt(str.length - 1)
 }
 
-function removeEmptyElements(stringArray) {
+function /* string[] */ removeEmptyElements(/* string[] */ stringArray) {
   var res = []
   for (var i = 0; i < stringArray.length; i++) {
     if (stringArray[i].length) {
@@ -136,14 +138,14 @@ function removeEmptyElements(stringArray) {
   return res
 }
 
-function runDopusCommand(command, tab) {
+function /* void */ runDopusCommand(/* string */ command, /* Tab */ tab) {
   debug("runDopusCommand '" + command + "'")
   var cmd = DOpus.NewCommand()
   cmd.SetSourceTab(tab)
   cmd.RunCommand(command)
 }
 
-function debug(text) {
+function /* void */ debug(/* string */ text) {
   if (Script.config.debug) {
     DOpus.Output(text)
   }
